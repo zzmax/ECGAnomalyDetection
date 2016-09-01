@@ -1,13 +1,212 @@
 package com.zzmax.admin.ecganomalydetection;
 
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import lecho.lib.hellocharts.animation.ChartAnimationListener;
+import lecho.lib.hellocharts.gesture.ZoomType;
+import lecho.lib.hellocharts.listener.LineChartOnValueSelectListener;
+import lecho.lib.hellocharts.listener.ViewportChangeListener;
+import lecho.lib.hellocharts.model.Axis;
+import lecho.lib.hellocharts.model.Line;
+import lecho.lib.hellocharts.model.LineChartData;
+import lecho.lib.hellocharts.model.PointValue;
+import lecho.lib.hellocharts.model.ValueShape;
+import lecho.lib.hellocharts.model.Viewport;
+import lecho.lib.hellocharts.util.ChartUtils;
+import lecho.lib.hellocharts.view.Chart;
+import lecho.lib.hellocharts.view.LineChartView;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+//        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_signal_chart);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().add(R.id.container, new PlaceholderFragment()).commit();
+        }
     }
+
+    /**
+     * A fragment containing a line chart.
+     */
+    public static class PlaceholderFragment extends Fragment {
+
+        private LineChartView chart;//for signal orignal
+        private LineChartData data;
+
+        private LineChartView chart2;//for noise
+        private LineChartData data2;
+
+        private int numberOfLines = 1;
+        private int maxNumberOfLines = 4;
+        private int numberOfPoints = 12;
+
+        float[][] randomNumbersTab = new float[maxNumberOfLines][numberOfPoints];
+
+        private boolean hasAxes = true;
+        private boolean hasAxesNames = true;
+        private boolean hasLines = true;
+        private boolean hasPoints = true;
+        private ValueShape shape = ValueShape.CIRCLE;
+        private boolean isFilled = false;
+        private boolean hasLabels = false;
+        private boolean isCubic = false;
+        private boolean hasLabelForSelected = false;
+        private boolean pointsHaveDifferentColor;
+
+        public PlaceholderFragment() {
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            setHasOptionsMenu(true);
+            View rootView = inflater.inflate(R.layout.fragment_line_chart, container, false);
+
+            chart = (LineChartView) rootView.findViewById(R.id.chart);
+            
+            chart2 = (LineChartView) rootView.findViewById(R.id.chart2);
+
+            // Generate data for previewed chart and copy of that data for preview chart.
+            generateDefaultData();
+
+            chart.setLineChartData(data);
+            // Disable zoom/scroll for previewed chart, visible chart ranges depends on preview chart viewport so
+            // zoom/scroll is unnecessary.
+            chart.setZoomEnabled(false);
+            chart.setScrollEnabled(false);
+
+            chart2.setLineChartData(data2);
+            chart2.setViewportChangeListener(new ViewportListener());
+
+            previewX(false);
+
+            return rootView;
+        }
+
+        // MENU
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//            inflater.inflate(R.menu.preview_line_chart, menu);
+        }
+
+//        @Override
+//        public boolean onOptionsItemSelected(MenuItem item) {
+//            int id = item.getItemId();
+//            if (id == R.id.action_reset) {
+//                generateDefaultData();
+//                chart.setLineChartData(data);
+//                chart2.setLineChartData(data2);
+//                previewX(true);
+//                return true;
+//            }
+//            if (id == R.id.action_preview_both) {
+//                previewXY();
+//                chart2.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
+//                return true;
+//            }
+//            if (id == R.id.action_preview_horizontal) {
+//                previewX(true);
+//                return true;
+//            }
+//            if (id == R.id.action_preview_vertical) {
+//                previewY();
+//                return true;
+//            }
+//            if (id == R.id.action_change_color) {
+//                int color = ChartUtils.pickColor();
+//                while (color == chart2.getPreviewColor()) {
+//                    color = ChartUtils.pickColor();
+//                }
+//                chart2.setPreviewColor(color);
+//                return true;
+//            }
+//            return super.onOptionsItemSelected(item);
+//        }
+
+        private void generateDefaultData() {
+            int numValues = 50;
+
+            List<PointValue> values = new ArrayList<PointValue>();
+            for (int i = 0; i < numValues; ++i) {
+                values.add(new PointValue(i, (float) Math.random() * 100f));
+            }
+
+            Line line = new Line(values);
+            line.setColor(ChartUtils.COLOR_GREEN);
+            line.setHasPoints(false);// too many values so don't draw points.
+
+            List<Line> lines = new ArrayList<Line>();
+            lines.add(line);
+
+            data = new LineChartData(lines);
+            data.setAxisXBottom(new Axis());
+            data.setAxisYLeft(new Axis().setHasLines(true));
+
+            // prepare preview data, is better to use separate deep copy for preview chart.
+            // Set color to grey to make preview area more visible.
+            data2 = new LineChartData(data);
+            data2.getLines().get(0).setColor(ChartUtils.DEFAULT_DARKEN_COLOR);
+
+        }
+
+        private void previewY() {
+            Viewport tempViewport = new Viewport(chart.getMaximumViewport());
+            float dy = tempViewport.height() / 4;
+            tempViewport.inset(0, dy);
+            chart2.setCurrentViewportWithAnimation(tempViewport);
+            chart2.setZoomType(ZoomType.VERTICAL);
+        }
+
+        private void previewX(boolean animate) {
+            Viewport tempViewport = new Viewport(chart.getMaximumViewport());
+            float dx = tempViewport.width() / 4;
+            tempViewport.inset(dx, 0);
+            if (animate) {
+                chart2.setCurrentViewportWithAnimation(tempViewport);
+            } else {
+                chart2.setCurrentViewport(tempViewport);
+            }
+            chart2.setZoomType(ZoomType.HORIZONTAL);
+        }
+
+        private void previewXY() {
+            // Better to not modify viewport of any chart directly so create a copy.
+            Viewport tempViewport = new Viewport(chart.getMaximumViewport());
+            // Make temp viewport smaller.
+            float dx = tempViewport.width() / 4;
+            float dy = tempViewport.height() / 4;
+            tempViewport.inset(dx, dy);
+            chart2.setCurrentViewportWithAnimation(tempViewport);
+        }
+
+        /**
+         * Viewport listener for preview chart(lower one). in {@link #onViewportChanged(Viewport)} method change
+         * viewport of upper chart.
+         */
+        private class ViewportListener implements ViewportChangeListener {
+
+            @Override
+            public void onViewportChanged(Viewport newViewport) {
+                // don't use animation, it is unnecessary when using preview chart.
+                chart.setCurrentViewport(newViewport);
+            }
+
+        }
+
+    }
+
 }
