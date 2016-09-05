@@ -1,5 +1,6 @@
 package com.zzmax.admin.ecganomalydetection;
 
+import android.content.res.AssetManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+//import java.io.FileInputStreamReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,19 +145,46 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
         private void generateDefaultData() {
-            int numValues = 50;
+            AssetManager am = getContext().getAssets();
+            InputStream is = null;
+            try {
+                is = am.open("samples.txt");
 
-            List<PointValue> values = new ArrayList<PointValue>();
-            for (int i = 0; i < numValues; ++i) {
-                values.add(new PointValue(i, (float) Math.random() * 100f));
-            }
+                BufferedReader reader = new BufferedReader(new InputStreamReader(
+                        is));
+                //Skip 2 lines.
+                for(int i=1;i<=2;i++)
+                {
+                    reader.readLine();
+                }
 
-            Line line = new Line(values);
-            line.setColor(ChartUtils.COLOR_GREEN);
-            line.setHasPoints(false);// too many values so don't draw points.
+                int numValues = 0;
 
-            List<Line> lines = new ArrayList<Line>();
-            lines.add(line);
+                List<PointValue> values = new ArrayList<PointValue>();
+                String aStr = null;
+                while (reader.ready())
+                {
+                    numValues++;
+                    aStr = reader.readLine();
+                    String[] separated = aStr.split("\t");
+                    String[] separated2 = separated[0].split(":");
+                    values.add(new PointValue(Float.parseFloat(separated2[1]), Float.parseFloat(separated[1])));
+                }
+//                 for (int i = 0; i < numValues; ++i) {
+//                     reader.readLine();
+////                    values.add(new PointValue(i, (float) Math.random() * 100f));
+//                     values.add(new PointValue(reader.read(), (float)reader.read()));
+//                 }
+
+                Line line = new Line(values);
+                line.setColor(ChartUtils.COLOR_GREEN);
+                line.setHasPoints(false);// too many values so don't draw points.
+
+                 List<Line> lines = new ArrayList<Line>();
+                lines.add(line);
+
+                is.close();
+
 
             data = new LineChartData(lines);
             data.setAxisXBottom(new Axis());
@@ -160,6 +194,9 @@ public class MainActivity extends AppCompatActivity {
             // Set color to grey to make preview area more visible.
             data2 = new LineChartData(data);
             data2.getLines().get(0).setColor(ChartUtils.DEFAULT_DARKEN_COLOR);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         }
 
