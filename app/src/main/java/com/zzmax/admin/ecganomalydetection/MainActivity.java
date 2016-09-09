@@ -148,28 +148,55 @@ public class MainActivity extends AppCompatActivity {
             AssetManager am = getContext().getAssets();
             InputStream is = null;
             try {
-                is = am.open("samples.txt");
+                is = am.open("heatbeatSample1.txt");
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         is));
-                //Skip 2 lines.
-                for(int i=1;i<=2;i++)
-                {
-                    reader.readLine();
-                }
+//                //Skip 2 lines.
+//                for(int i=1;i<=2;i++)
+//                {
+//                    reader.readLine();
+//                }
 
                 int numValues = 0;
 
                 List<PointValue> values = new ArrayList<PointValue>();
                 String aStr = null;
+                List<double[]> heatMetricsArray = new ArrayList<double[]>();
+
                 while (reader.ready())
                 {
-                    numValues++;
                     aStr = reader.readLine();
-                    String[] separated = aStr.split("\t");
-                    String[] separated2 = separated[0].split(":");
-                    values.add(new PointValue(Float.parseFloat(separated2[1]), Float.parseFloat(separated[1])));
+//                    String[] separated = aStr.split("\t");
+//                    String[] separated2 = separated[0].split(":");
+
+//                    values.add(new PointValue(Float.parseFloat(separated2[1]), Float.parseFloat(separated[1])));
+                    String[] separated = aStr.split(",");
+                    int i = 0;
+                    double [] aHeatArray = new double[separated.length];
+                    while (i < separated.length)
+                    {
+//                        values.add(new PointValue(numValues, Float.parseFloat(separated[i])));
+                        aHeatArray[i] = Double.parseDouble(separated[i]);
+                        i++;
+                    }
+                    heatMetricsArray.add(aHeatArray);
+                    numValues++;
+
                 }
+                double[][] heatMetrics = new double[numValues][];
+
+                for (int i=0; i<numValues; i++)
+                {
+                    heatMetrics[i] = heatMetricsArray.get(i);
+                }
+                noiseTransform.initialize();
+                heatMetrics = noiseTransform.asSignal(heatMetrics);
+
+                for (int i = 0; i < heatMetrics.length; i++) {
+                    for (int j=0; j < heatMetrics[i].length; j++)
+                     values.add(new PointValue(j, (float) heatMetrics[i][j]));
+                 }
 //                 for (int i = 0; i < numValues; ++i) {
 //                     reader.readLine();
 ////                    values.add(new PointValue(i, (float) Math.random() * 100f));
@@ -246,4 +273,37 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public  static ArrayList<heatbeat> getHeatBeatListFromTextFiles(String filePath)
+    {
+        FileInputStream fis = null;
+        InputStreamReader isr = null;
+        BufferedReader bReader = null;
+        ArrayList<heatbeat> listRes = new ArrayList<heatbeat>();
+        try{
+            fis = new FileInputStream(filePath);
+            isr = new InputStreamReader(fis);
+            bReader = new BufferedReader(isr);
+            // get from text
+            String line = null;
+            //save to array
+            String[] strHeatBeat = null;
+            while (true)
+            {
+                line = bReader.readLine();
+                if (line == null)
+                {
+                    break;
+                }
+                else
+                {
+                    strHeatBeat = line.split(",");
+//                    listRes.add(new heatbeat())
+                }
+            }
+        }catch (Exception e)
+        {
+
+        }
+        return listRes;
+    }
 }
