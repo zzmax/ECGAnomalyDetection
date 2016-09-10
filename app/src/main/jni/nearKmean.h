@@ -17,7 +17,7 @@
 #include "asSignal_types.h"
 
 /* Function Declarations */
-extern void nearKmean(const emxArray_real_T *clusters, const emxArray_real_T
+extern emxArray_real_T *  nearKmean(const emxArray_real_T *clusters, const emxArray_real_T
                       *data, emxArray_real_T *clusterIndices);
 
 #endif

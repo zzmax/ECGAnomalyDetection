@@ -9,7 +9,7 @@ public class noiseTransform {
     static { System.loadLibrary("transformNoise"); }
     /* functions prototypes */
     public static native void initialize();
-//    public static native double[][] nearKmean(double[][] clusters,double[][] samples);
-//    public static native double[][] diffKmean(double[][] clusterIndices,double[][] clusters,double[][] samples);
+    public static native double[][] nearKmean(double[][] clusters,double[][] samples);
+    public static native double[][] diffKmean(double[][] clusterIndices,double[][] clusters,double[][] samples);
     public static native double[][] asSignal(double[][] diffWindows);
 }

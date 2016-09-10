@@ -1,9 +1,8 @@
 LOCAL_PATH := $(call my-dir)
 MY_SOURCES := noiseTransform.c
 MY_SOURCES += asSignal.c
-#MY_SOURCES += func2.c
-#MY_SOURCES += func3.c
-#MY_SOURCES += func4.c
+MY_SOURCES += nearKmean.c
+MY_SOURCES += diffKmean.c
 MY_SOURCES += asSignal_initialize.c
 MY_SOURCES += asSignal_emxAPI.c
 MY_SOURCES += asSignal_emxutil.c

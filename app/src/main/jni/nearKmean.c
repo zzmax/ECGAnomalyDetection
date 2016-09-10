@@ -13,7 +13,7 @@
 #include "asSignal_emxutil.h"
 
 /* Function Definitions */
-void nearKmean(const emxArray_real_T *clusters, const emxArray_real_T *data,
+emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_T *data,
                emxArray_real_T *clusterIndices)
 {
   int numObservarations;
@@ -204,6 +204,7 @@ void nearKmean(const emxArray_real_T *clusters, const emxArray_real_T *data,
   }
 
   emxFree_int32_T(&iindx);
+  return  clusterIndices;
 }
 
 /* End of code generation (nearKmean.c) */

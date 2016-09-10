@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
                 List<PointValue> values = new ArrayList<PointValue>();
                 String aStr = null;
                 List<double[]> heatMetricsArray = new ArrayList<double[]>();
+                List<double[]> clustersMetricsArray = new ArrayList<double[]>();
 
                 while (reader.ready())
                 {
@@ -190,7 +191,43 @@ public class MainActivity extends AppCompatActivity {
                 {
                     heatMetrics[i] = heatMetricsArray.get(i);
                 }
+
+                is.close();
+                //get clusters
+                is = am.open("clusters.txt");
+                BufferedReader reader2 = new BufferedReader(new InputStreamReader(
+                        is));
+                numValues = 0;
+                while (reader2.ready())
+                {
+                    aStr = reader2.readLine();
+//                    String[] separated = aStr.split("\t");
+//                    String[] separated2 = separated[0].split(":");
+
+//                    values.add(new PointValue(Float.parseFloat(separated2[1]), Float.parseFloat(separated[1])));
+                    String[] separated = aStr.split(",");
+                    int i = 0;
+                    double [] aClusterArray = new double[separated.length];
+                    while (i < separated.length)
+                    {
+//                        values.add(new PointValue(numValues, Float.parseFloat(separated[i])));
+                        aClusterArray[i] = Double.parseDouble(separated[i]);
+                        i++;
+                    }
+                    clustersMetricsArray.add(aClusterArray);
+                    numValues++;
+
+                }
+                double[][] clustersMetrics = new double[numValues][];
+
+                for (int i=0; i<numValues; i++)
+                {
+                    clustersMetrics[i] = clustersMetricsArray.get(i);
+                }
+                double[][] diffWindowsMetrics = new double[numValues][];
+
                 noiseTransform.initialize();
+                diffWindowsMetrics = noiseTransform.nearKmean(clustersMetrics,heatMetrics);
                 heatMetrics = noiseTransform.asSignal(heatMetrics);
 
                 for (int i = 0; i < heatMetrics.length; i++) {

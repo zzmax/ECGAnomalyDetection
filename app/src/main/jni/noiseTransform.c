@@ -93,8 +93,98 @@ JNIEXPORT void JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTransform_i
 JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTransform_nearKmean
   (JNIEnv *env, jclass cls, jobjectArray a, jobjectArray b)
 {
-/*
-    return func1(a);*/
+    emxArray_real_T *clusters;
+    emxArray_real_T *data;
+    emxArray_real_T *clusterIndices;
+    emxInitArray_real_T(&clusterIndices, 2);
+
+
+    // Get a class reference for double
+    jclass classDouble = (*env)->FindClass(env, "[D");
+
+
+    // Get the length (number of double arrays) of the object array passed in
+    int numArrays = (*env)->GetArrayLength(env, a);
+    /* Initialize function 'asSignal' input arguments. */
+    /* Initialize function input argument 'diffWindows'. */
+    int iv0[2] = { numArrays, 60 };
+
+    int idx0;
+    int idx1;
+
+    /* Set the size of the array.
+       Change this size to the value that the application requires. */
+    clusters = emxCreateND_real_T(2, iv0);
+
+    numArrays = (*env)->GetArrayLength(env, b);
+    iv0[0] = numArrays;
+    data = emxCreateND_real_T(2, iv0);
+
+    /* Loop over the array to initialize each element. */
+    for (idx0 = 0; idx0 < clusters->size[0U]; idx0++) {
+        // get the object at the i'th position (double array)
+        jdoubleArray array = (jdoubleArray) (*env)->GetObjectArrayElement(env, a, idx0);
+
+        jsize length = (*env)->GetArrayLength(env, array);
+
+        jdouble *elements = (*env)->GetDoubleArrayElements(env,array,0);
+
+        for (idx1 = 0; idx1 < 60; idx1++) {
+            /* Set the value of the array element.
+               Change this value to the value that the application requires. */
+            clusters->data[idx0 + clusters->size[0] * idx1] = elements[idx1];
+        }
+
+        (*env)->ReleaseDoubleArrayElements(env, array, elements, 0); /* deleting the temporary C array */
+        (*env)->DeleteLocalRef(env,array);
+    }
+
+
+    for (idx0 = 0; idx0 < data->size[0U]; idx0++) {
+        // get the object at the i'th position (double array)
+        jdoubleArray array = (jdoubleArray) (*env)->GetObjectArrayElement(env, b, idx0);
+
+        jsize length = (*env)->GetArrayLength(env, array);
+
+        jdouble *elements = (*env)->GetDoubleArrayElements(env,array,0);
+
+        for (idx1 = 0; idx1 < 60; idx1++) {
+            /* Set the value of the array element.
+               Change this value to the value that the application requires. */
+            data->data[idx0 + data->size[0] * idx1] = elements[idx1];
+        }
+
+        (*env)->ReleaseDoubleArrayElements(env, array, elements, 0); /* deleting the temporary C array */
+        (*env)->DeleteLocalRef(env,array);
+    }
+
+    iv0[1] = 1;
+    clusterIndices  = emxCreateND_real_T(2, iv0);
+    /* Call the entry-point 'asSignal'. */
+    clusterIndices = nearKmean(clusters, data, clusterIndices);
+
+    jobjectArray outJNIArray = (*env)->NewObjectArray(env, clusterIndices->size[0U], classDouble, NULL);
+
+    for (idx0 = 0; idx0 < clusterIndices->size[0U]; idx0++) {
+        jdoubleArray array = (*env)->NewDoubleArray(env, clusterIndices->size[1U]);
+
+        for (idx1 = 0; idx1 < clusterIndices->size[1U]; idx1++) {
+            /* copy elements to a double array */
+            jdouble *body = (*env)->GetDoubleArrayElements(env,array, 0);
+            body[idx1] = clusterIndices->data[idx0 + clusterIndices->size[0] * idx1];
+            (*env)->ReleaseDoubleArrayElements(env, array, body, 0);
+        }
+        //copy array elements to output JNI array
+        (*env)->SetObjectArrayElement(env, outJNIArray, idx0, array);
+        /* deleting the temporary C array */
+        (*env)->DeleteLocalRef(env,array);
+    }
+
+    emxDestroyArray_real_T(clusters);
+    emxDestroyArray_real_T(data);
+    emxDestroyArray_real_T(clusterIndices);
+
+    return outJNIArray;
 }
 
 
@@ -133,10 +223,8 @@ JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTra
     emxInitArray_real_T(&reconstruct, 2);
 
 
-    // Get a class reference for java.lang.Integer
+        // Get a class reference for double
        jclass classDouble = (*env)->FindClass(env, "[D");
-//       jmethodID midDoubleInit = (*env)->GetMethodID(env, classDouble, "<init>", "(D)V");
-//       if (NULL == midDoubleInit) return NULL;
 
        // Get the length (number of double arrays) of the object array passed in
        int numArrays = (*env)->GetArrayLength(env, a);
@@ -172,29 +260,22 @@ JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTra
      /* Call the entry-point 'asSignal'. */
       reconstruct = asSignal(diffWindows, reconstruct);
 
-
-
     jobjectArray outJNIArray = (*env)->NewObjectArray(env, reconstruct->size[0U], classDouble, NULL);
 
     for (idx0 = 0; idx0 < reconstruct->size[0U]; idx0++) {
-        // get the object at the i'th position (double array)
         jdoubleArray array = (*env)->NewDoubleArray(env, reconstruct->size[1U]);
 
         for (idx1 = 0; idx1 < reconstruct->size[1U]; idx1++) {
-            /* Set the value of the array element.
-               Change this value to the value that the application requires. */
+            /* copy elements to a double array */
             jdouble *body = (*env)->GetDoubleArrayElements(env,array, 0);
             body[idx1] = reconstruct->data[idx0 + reconstruct->size[0] * idx1];
             (*env)->ReleaseDoubleArrayElements(env, array, body, 0);
         }
+        //copy array elements to output JNI array
         (*env)->SetObjectArrayElement(env, outJNIArray, idx0, array);
-
-//        (*env)->ReleaseDoubleArrayElements(env, array, elements, 0); /* deleting the temporary C array */
+        /* deleting the temporary C array */
         (*env)->DeleteLocalRef(env,array);
     }
-      //the result of reconstruct is a single row array
-//      jdoubleArray array = (*env)->NewDoubleArray(env, 9);
-
 
       emxDestroyArray_real_T(reconstruct);
       emxDestroyArray_real_T(diffWindows);
