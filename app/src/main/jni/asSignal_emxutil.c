@@ -8,6 +8,7 @@
 /* Include files */
 #include "rt_nonfinite.h"
 #include "asSignal.h"
+#include "detectAnomaly.h"
 #include "diffKmean.h"
 #include "nearKmean.h"
 #include "asSignal_emxutil.h"
@@ -47,6 +48,20 @@ void emxEnsureCapacity(emxArray__common *emxArray, int oldNumel, int elementSize
   }
 }
 
+void emxFree_boolean_T(emxArray_boolean_T **pEmxArray)
+{
+  if (*pEmxArray != (emxArray_boolean_T *)NULL) {
+    if (((*pEmxArray)->data != (boolean_T *)NULL) && (*pEmxArray)->canFreeData)
+    {
+      free((void *)(*pEmxArray)->data);
+    }
+
+    free((void *)(*pEmxArray)->size);
+    free((void *)*pEmxArray);
+    *pEmxArray = (emxArray_boolean_T *)NULL;
+  }
+}
+
 void emxFree_int32_T(emxArray_int32_T **pEmxArray)
 {
   if (*pEmxArray != (emxArray_int32_T *)NULL) {
@@ -70,6 +85,22 @@ void emxFree_real_T(emxArray_real_T **pEmxArray)
     free((void *)(*pEmxArray)->size);
     free((void *)*pEmxArray);
     *pEmxArray = (emxArray_real_T *)NULL;
+  }
+}
+
+void emxInit_boolean_T(emxArray_boolean_T **pEmxArray, int numDimensions)
+{
+  emxArray_boolean_T *emxArray;
+  int i;
+  *pEmxArray = (emxArray_boolean_T *)malloc(sizeof(emxArray_boolean_T));
+  emxArray = *pEmxArray;
+  emxArray->data = (boolean_T *)NULL;
+  emxArray->numDimensions = numDimensions;
+  emxArray->size = (int *)malloc((unsigned int)(sizeof(int) * numDimensions));
+  emxArray->allocatedSize = 0;
+  emxArray->canFreeData = true;
+  for (i = 0; i < numDimensions; i++) {
+    emxArray->size[i] = 0;
   }
 }
 

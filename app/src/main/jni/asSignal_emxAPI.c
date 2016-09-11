@@ -8,6 +8,7 @@
 /* Include files */
 #include "rt_nonfinite.h"
 #include "asSignal.h"
+#include "detectAnomaly.h"
 #include "diffKmean.h"
 #include "nearKmean.h"
 #include "asSignal_emxAPI.h"

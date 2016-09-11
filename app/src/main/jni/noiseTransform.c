@@ -385,4 +385,16 @@ JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTra
     return outJNIArray;
 }
 
+/*
+ * Class:     com_zzmax_admin_ecganomalydetection_noiseTransform
+ * Method:    initialize
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTransform_detectAnomaly
+  (JNIEnv *env, jclass cls)
+{
+    asSignal_initialize();
+}
+
+
 
