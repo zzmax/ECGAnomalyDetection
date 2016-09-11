@@ -196,17 +196,119 @@ JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTra
 JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTransform_diffKmean
   (JNIEnv *env, jclass cls, jobjectArray a, jobjectArray b, jobjectArray c)
 {
-    /*jdouble result;
+    emxArray_real_T *clusters;
+    emxArray_real_T *data;
+    emxArray_real_T *clusterIndices;
+    emxArray_real_T *diffWindows;
+    emxInitArray_real_T(&diffWindows, 2);
 
-    double* ac = (*env)->GetDoubleArrayElements(env,a,0);
-    double* bc = (*env)->GetDoubleArrayElements(env,b,0);
 
-    result = func2(ac, bc);
+    // Get a class reference for double
+    jclass classDouble = (*env)->FindClass(env, "[D");
 
-    (*env)->ReleaseDoubleArrayElements(env, a, ac, 0);
-    (*env)->ReleaseDoubleArrayElements(env, b, bc, 0);
+    // Get the length (number of double arrays) of the object array passed in
+    int numArraysClusterIndice = (*env)->GetArrayLength(env, a);
+    /* Initialize function input argument 'diffWindows'. */
+    int iv1[1] = { numArraysClusterIndice};
 
-    return result;*/
+    int idx0;
+    int idx1;
+
+    clusterIndices = emxCreateND_real_T(1, iv1);
+    for (idx0 = 0; idx0 < numArraysClusterIndice; idx0++) {
+        // get the object at the i'th position (double array)
+        jdoubleArray array = (jdoubleArray) (*env)->GetObjectArrayElement(env, a, idx0);
+
+        jsize length = (*env)->GetArrayLength(env, array);
+
+        jdouble *elements = (*env)->GetDoubleArrayElements(env,array,0);
+
+        for (idx1 = 0; idx1 < length; idx1++) {
+            /* Set the value of the array element.
+               Change this value to the value that the application requires. */
+            clusterIndices->data[idx0] = elements[idx1];
+        }
+
+        (*env)->ReleaseDoubleArrayElements(env, array, elements, 0); /* deleting the temporary C array */
+        (*env)->DeleteLocalRef(env,array);
+    }
+
+    /* Set the size of the array.
+       Change this size to the value that the application requires. */
+    int iv0[2] = { numArraysClusterIndice, 1 };
+    int numArraysClusters = (*env)->GetArrayLength(env, b);
+    iv0[0] = numArraysClusters;
+    iv0[1] = 60;
+    clusters = emxCreateND_real_T(2, iv0);
+    /* Loop over the array to initialize each element. */
+    for (idx0 = 0; idx0 < clusters->size[0U]; idx0++) {
+        // get the object at the i'th position (double array)
+        jdoubleArray array = (jdoubleArray) (*env)->GetObjectArrayElement(env, b, idx0);
+
+        jsize length = (*env)->GetArrayLength(env, array);
+
+        jdouble *elements = (*env)->GetDoubleArrayElements(env,array,0);
+
+        for (idx1 = 0; idx1 < 60; idx1++) {
+            /* Set the value of the array element.
+               Change this value to the value that the application requires. */
+            clusters->data[idx0 + clusters->size[0] * idx1] = elements[idx1];
+        }
+
+        (*env)->ReleaseDoubleArrayElements(env, array, elements, 0); /* deleting the temporary C array */
+        (*env)->DeleteLocalRef(env,array);
+    }
+
+    int numArraysData = (*env)->GetArrayLength(env, c);
+    iv0[0] = numArraysData;
+    iv0[1] = 60;
+    data = emxCreateND_real_T(2, iv0);
+    for (idx0 = 0; idx0 < data->size[0U]; idx0++) {
+        // get the object at the i'th position (double array)
+        jdoubleArray array = (jdoubleArray) (*env)->GetObjectArrayElement(env, c, idx0);
+
+
+        jsize length = (*env)->GetArrayLength(env, array);
+
+        jdouble *elements = (*env)->GetDoubleArrayElements(env,array,0);
+
+        for (idx1 = 0; idx1 < 60; idx1++) {
+            /* Set the value of the array element.
+               Change this value to the value that the application requires. */
+            data->data[idx0 + data->size[0] * idx1] = elements[idx1];
+        }
+
+        (*env)->ReleaseDoubleArrayElements(env, array, elements, 0); /* deleting the temporary C array */
+        (*env)->DeleteLocalRef(env,array);
+    }
+
+//    diffWindows  = emxCreateND_real_T(2, iv0);
+    /* Call the entry-point 'asSignal'. */
+    diffWindows = diffKmean(clusterIndices, clusters, data, diffWindows);
+
+    jobjectArray outJNIArray = (*env)->NewObjectArray(env, diffWindows->size[0U], classDouble, NULL);
+
+    for (idx0 = 0; idx0 < diffWindows->size[0U]; idx0++) {
+        jdoubleArray array = (*env)->NewDoubleArray(env, diffWindows->size[1U]);
+
+        for (idx1 = 0; idx1 < diffWindows->size[1U]; idx1++) {
+            /* copy elements to a double array */
+            jdouble *body = (*env)->GetDoubleArrayElements(env,array, 0);
+            body[idx1] = diffWindows->data[idx0 + diffWindows->size[0] * idx1];
+            (*env)->ReleaseDoubleArrayElements(env, array, body, 0);
+        }
+        //copy array elements to output JNI array
+        (*env)->SetObjectArrayElement(env, outJNIArray, idx0, array);
+        /* deleting the temporary C array */
+        (*env)->DeleteLocalRef(env,array);
+    }
+
+    emxDestroyArray_real_T(clusters);
+    emxDestroyArray_real_T(data);
+    emxDestroyArray_real_T(clusterIndices);
+    emxDestroyArray_real_T(diffWindows);
+
+    return outJNIArray;
 }
 
 /*
@@ -282,49 +384,5 @@ JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTra
 //        (*env)->DeleteLocalRef(env,array);
     return outJNIArray;
 }
-
-/*
- * Class:     example
- * Method:    func4
- * Signature: ([F[F)[F
- */
-/*JNIEXPORT jdoubleArray JNICALL Java_com_zzmax_admin_example3_example_func4
-  (JNIEnv *env, jclass cls, jdoubleArray a, jdoubleArray b)
-{
-    jdouble temp[9];
-    double* ac = (*env)->GetDoubleArrayElements(env,a,0);
-    double* bc = (*env)->GetDoubleArrayElements(env,b,0);
-    /* creating new JAVA array */
-/*    jdoubleArray result = (*env)->NewDoubleArray(env, 9);
-    if (result != NULL) {
-        //func4(ac, bc, temp);
-        /* copying the C array to Java array */
-/*        (*env)->SetDoubleArrayRegion(env, result, 0, 9, temp);
-    }
-
-    (*env)->ReleaseDoubleArrayElements(env, a, ac, 0);
-    (*env)->ReleaseDoubleArrayElements(env, b, bc, 0);
-
-    return result;
-}
-
-
-/*JNIEXPORT jdoubleArray JNICALL Java_com_zzmax_admin_example3_example_kalmanfilter
-  (JNIEnv *env, jclass cls, jdoubleArray a)*/
-//{
-  //  jdouble temp[2];
-    /* copying JAVA array to C array */
-//    jdouble* ac = (*env)->GetDoubleArrayElements(env,a,0);
-    /* creating new JAVA array */
-//    jdoubleArray result = (*env)->NewDoubleArray(env, 3);
-//    if (result != NULL) {
-//        kalmanfilter(ac, temp);
-        /* copying the C array to Java array */
-//        (*env)->SetDoubleArrayRegion(env, result, 0, 3, temp);
-//    }
-    /* deleting temporary C array */
-//    (*env)->ReleaseDoubleArrayElements(env, a, ac, 0);
-//    return result;
-//}
 
 

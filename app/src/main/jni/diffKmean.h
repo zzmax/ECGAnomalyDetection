@@ -17,7 +17,7 @@
 #include "asSignal_types.h"
 
 /* Function Declarations */
-extern void diffKmean(const emxArray_real_T *clusterIndices, const
+extern emxArray_real_T * diffKmean(const emxArray_real_T *clusterIndices, const
                       emxArray_real_T *clusters, const emxArray_real_T *data,
                       emxArray_real_T *diffWindows);
 

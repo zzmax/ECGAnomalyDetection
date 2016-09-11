@@ -13,7 +13,7 @@
 #include "asSignal_emxutil.h"
 
 /* Function Definitions */
-void diffKmean(const emxArray_real_T *clusterIndices, const emxArray_real_T
+emxArray_real_T * diffKmean(const emxArray_real_T *clusterIndices, const emxArray_real_T
                *clusters, const emxArray_real_T *data, emxArray_real_T
                *diffWindows)
 {
@@ -65,6 +65,7 @@ void diffKmean(const emxArray_real_T *clusterIndices, const emxArray_real_T
   }
 
   emxFree_real_T(&b_diffWindows);
+  return diffWindows;
 }
 
 /* End of code generation (diffKmean.c) */
