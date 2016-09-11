@@ -18,11 +18,11 @@ double sum(const emxArray_boolean_T *x)
 {
   double y;
   int k;
-  if (x->size[0] == 0) {
+  if (x->size[1] == 0) {
     y = 0.0;
   } else {
     y = x->data[0];
-    for (k = 2; k <= x->size[0]; k++) {
+    for (k = 2; k <= x->size[1]; k++) {
       y += (double)x->data[k - 1];
     }
   }

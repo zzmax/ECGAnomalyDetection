@@ -8,6 +8,7 @@
 /* Include files */
 #include "rt_nonfinite.h"
 #include "asSignal.h"
+#include "detectAnomaly.h"
 #include "diffKmean.h"
 #include "nearKmean.h"
 #include "asSignal_emxutil.h"
@@ -76,8 +77,9 @@ emxArray_real_T * asSignal(const emxArray_real_T *diffWindows, emxArray_real_T *
   for (i0 = 0; i0 < k; i0++) {
     reconstruct->data[reconstruct->size[0] * i0] = tmp->data[i0];
   }
+
   emxFree_real_T(&tmp);
-  return reconstruct;
+  return  reconstruct;
 }
 
 /* End of code generation (asSignal.c) */

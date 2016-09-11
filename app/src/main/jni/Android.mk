@@ -11,6 +11,8 @@ MY_SOURCES += rt_nonfinite.c
 MY_SOURCES += rtGetInf.c
 MY_SOURCES += rtGetNaN.c
 MY_SOURCES += sum.c
+MY_SOURCES += mean.c
+MY_SOURCES += std.c
 include $(CLEAR_VARS)
 LOCAL_MODULE    := transformNoise
 LOCAL_SRC_FILES := $(MY_SOURCES)

@@ -39,6 +39,14 @@ JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTra
 JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTransform_asSignal
   (JNIEnv *, jclass, jobjectArray);
 
+/*
+ * Class:     com_zzmax_admin_ecganomalydetection_noiseTransform
+ * Method:    detectAnomaly
+ * Signature: ([[DDD)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTransform_detectAnomaly
+  (JNIEnv *, jclass, jobjectArray, jdouble, jdouble);
+
 #ifdef __cplusplus
 }
 #endif

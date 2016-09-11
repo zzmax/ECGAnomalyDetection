@@ -8,12 +8,13 @@
 /* Include files */
 #include "rt_nonfinite.h"
 #include "asSignal.h"
+#include "detectAnomaly.h"
 #include "diffKmean.h"
 #include "nearKmean.h"
 #include "asSignal_emxutil.h"
 
 /* Function Definitions */
-emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_T *data,
+emxArray_real_T * nearKmean(const emxArray_real_T *clusters, const emxArray_real_T *samples,
                emxArray_real_T *clusterIndices)
 {
   int numObservarations;
@@ -23,7 +24,7 @@ emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_
   int K;
   int ibmat;
   int k;
-  emxArray_real_T *r0;
+  emxArray_real_T *r5;
   emxArray_real_T *y;
   emxArray_real_T *a;
   int cindx;
@@ -38,7 +39,7 @@ emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_
   emxArray_int32_T *iindx;
   int b_ix;
   boolean_T exitg1;
-  numObservarations = data->size[0];
+  numObservarations = samples->size[0];
   for (ixstop = 0; ixstop < 2; ixstop++) {
     tmp[ixstop] = (unsigned int)clusters->size[ixstop];
   }
@@ -55,7 +56,7 @@ emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_
   }
 
   k = 0;
-  emxInit_real_T1(&r0, 1);
+  emxInit_real_T1(&r5, 1);
   emxInit_real_T(&y, 2);
   emxInit_real_T(&a, 2);
   while (k <= K - 1) {
@@ -75,12 +76,12 @@ emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_
     }
 
     ixstop = a->size[0] * a->size[1];
-    a->size[0] = data->size[0];
+    a->size[0] = samples->size[0];
     a->size[1] = 60;
     emxEnsureCapacity((emxArray__common *)a, ixstop, (int)sizeof(double));
-    ibmat = data->size[0] * data->size[1];
+    ibmat = samples->size[0] * samples->size[1];
     for (ixstop = 0; ixstop < ibmat; ixstop++) {
-      a->data[ixstop] = data->data[ixstop] - a->data[ixstop];
+      a->data[ixstop] = samples->data[ixstop] - a->data[ixstop];
     }
 
     ixstop = y->size[0] * y->size[1];
@@ -92,16 +93,16 @@ emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_
       y->data[ibmat] = a->data[ibmat] * a->data[ibmat];
     }
 
-    ixstop = r0->size[0];
-    r0->size[0] = y->size[0];
-    emxEnsureCapacity((emxArray__common *)r0, ixstop, (int)sizeof(double));
+    ixstop = r5->size[0];
+    r5->size[0] = y->size[0];
+    emxEnsureCapacity((emxArray__common *)r5, ixstop, (int)sizeof(double));
     if (y->size[0] == 0) {
-      ibmat = r0->size[0];
-      ixstop = r0->size[0];
-      r0->size[0] = ibmat;
-      emxEnsureCapacity((emxArray__common *)r0, ixstop, (int)sizeof(double));
+      ibmat = r5->size[0];
+      ixstop = r5->size[0];
+      r5->size[0] = ibmat;
+      emxEnsureCapacity((emxArray__common *)r5, ixstop, (int)sizeof(double));
       for (ixstop = 0; ixstop < ibmat; ixstop++) {
-        r0->data[ixstop] = 0.0;
+        r5->data[ixstop] = 0.0;
       }
     } else {
       vstride = y->size[0];
@@ -117,13 +118,13 @@ emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_
         }
 
         iy++;
-        r0->data[iy] = s;
+        r5->data[iy] = s;
       }
     }
 
-    ibmat = r0->size[0];
+    ibmat = r5->size[0];
     for (ixstop = 0; ixstop < ibmat; ixstop++) {
-      D->data[ixstop + D->size[0] * k] = r0->data[ixstop];
+      D->data[ixstop + D->size[0] * k] = r5->data[ixstop];
     }
 
     k++;
@@ -131,7 +132,7 @@ emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_
 
   emxFree_real_T(&a);
   emxFree_real_T(&y);
-  emxFree_real_T(&r0);
+  emxFree_real_T(&r5);
   emxInit_real_T1(&extremum, 1);
   emxInit_int32_T(&iindx, 1);
   ixstop = extremum->size[0];
@@ -204,7 +205,7 @@ emxArray_real_T *nearKmean(const emxArray_real_T *clusters, const emxArray_real_
   }
 
   emxFree_int32_T(&iindx);
-  return  clusterIndices;
+  return clusterIndices;
 }
 
 /* End of code generation (nearKmean.c) */

@@ -1,6 +1,7 @@
 package com.zzmax.admin.ecganomalydetection;
 
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 //import java.io.FileInputStreamReader;
@@ -20,6 +25,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+//import java.lang.object;
+import org.apache.commons.math3.stat.descriptive.*;
 
 import lecho.lib.hellocharts.animation.ChartAnimationListener;
 import lecho.lib.hellocharts.gesture.ZoomType;
@@ -37,6 +44,12 @@ import lecho.lib.hellocharts.view.LineChartView;
 
 public class MainActivity extends AppCompatActivity {
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +58,49 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.container, new PlaceholderFragment()).commit();
         }
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.zzmax.admin.ecganomalydetection/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.zzmax.admin.ecganomalydetection/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 
     /**
@@ -84,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_line_chart, container, false);
 
             chart = (LineChartView) rootView.findViewById(R.id.chart);
-            
+
             chart2 = (LineChartView) rootView.findViewById(R.id.chart2);
 
             // Generate data for previewed chart and copy of that data for preview chart.
@@ -165,8 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 List<double[]> heatMetricsArray = new ArrayList<double[]>();
                 List<double[]> clustersMetricsArray = new ArrayList<double[]>();
 
-                while (reader.ready())
-                {
+                while (reader.ready()) {
                     aStr = reader.readLine();
 //                    String[] separated = aStr.split("\t");
 //                    String[] separated2 = separated[0].split(":");
@@ -174,9 +229,8 @@ public class MainActivity extends AppCompatActivity {
 //                    values.add(new PointValue(Float.parseFloat(separated2[1]), Float.parseFloat(separated[1])));
                     String[] separated = aStr.split(",");
                     int i = 0;
-                    double [] aHeatArray = new double[separated.length];
-                    while (i < separated.length)
-                    {
+                    double[] aHeatArray = new double[separated.length];
+                    while (i < separated.length) {
 //                        values.add(new PointValue(numValues, Float.parseFloat(separated[i])));
                         aHeatArray[i] = Double.parseDouble(separated[i]);
                         i++;
@@ -187,8 +241,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 double[][] heatMetrics = new double[numHeatMetricsRow][];
 
-                for (int i=0; i<numHeatMetricsRow; i++)
-                {
+                for (int i = 0; i < numHeatMetricsRow; i++) {
                     heatMetrics[i] = heatMetricsArray.get(i);
                 }
 
@@ -198,8 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 BufferedReader reader2 = new BufferedReader(new InputStreamReader(
                         is));
                 int numClusterMetricsRow = 0;
-                while (reader2.ready())
-                {
+                while (reader2.ready()) {
                     aStr = reader2.readLine();
 //                    String[] separated = aStr.split("\t");
 //                    String[] separated2 = separated[0].split(":");
@@ -207,9 +259,8 @@ public class MainActivity extends AppCompatActivity {
 //                    values.add(new PointValue(Float.parseFloat(separated2[1]), Float.parseFloat(separated[1])));
                     String[] separated = aStr.split(",");
                     int i = 0;
-                    double [] aClusterArray = new double[separated.length];
-                    while (i < separated.length)
-                    {
+                    double[] aClusterArray = new double[separated.length];
+                    while (i < separated.length) {
 //                        values.add(new PointValue(numValues, Float.parseFloat(separated[i])));
                         aClusterArray[i] = Double.parseDouble(separated[i]);
                         i++;
@@ -220,49 +271,63 @@ public class MainActivity extends AppCompatActivity {
                 }
                 double[][] clustersMetrics = new double[numClusterMetricsRow][];
 
-                for (int i=0; i<numClusterMetricsRow; i++)
-                {
+                for (int i = 0; i < numClusterMetricsRow; i++) {
                     clustersMetrics[i] = clustersMetricsArray.get(i);
                 }
 
                 double[][] clusterIndiceMetrics = new double[numHeatMetricsRow][1];
 
                 noiseTransform.initialize();
-                clusterIndiceMetrics = noiseTransform.nearKmean(clustersMetrics,heatMetrics);
+                clusterIndiceMetrics = noiseTransform.nearKmean(clustersMetrics, heatMetrics);
 
                 double[][] diffWindowsMetrics = new double[numHeatMetricsRow][];
-                diffWindowsMetrics = noiseTransform.diffKmean(clusterIndiceMetrics,clustersMetrics,heatMetrics);
-
-                heatMetrics = noiseTransform.asSignal(diffWindowsMetrics);
+                diffWindowsMetrics = noiseTransform.diffKmean(clusterIndiceMetrics, clustersMetrics, heatMetrics);
+                double[][] reconstructDelta  = noiseTransform.asSignal(diffWindowsMetrics);
 
                 for (int i = 0; i < heatMetrics.length; i++) {
-                    for (int j=0; j < heatMetrics[i].length; j++)
-                     values.add(new PointValue(j, (float) heatMetrics[i][j]));
-                 }
+                    for (int j = 0; j < heatMetrics[i].length; j++)
+                        values.add(new PointValue(j, (float) heatMetrics[i][j]));
+                }
 //                 for (int i = 0; i < numValues; ++i) {
 //                     reader.readLine();
 ////                    values.add(new PointValue(i, (float) Math.random() * 100f));
 //                     values.add(new PointValue(reader.read(), (float)reader.read()));
 //                 }
 
+
+/*************************************************/
+                DescriptiveStatistics stats = new DescriptiveStatistics();
+                // Add the data from the array
+                for( int i = 0; i < reconstructDelta[0].length; i++) {
+                    stats.addValue(reconstructDelta[0][i]);
+                }
+
+                // Compute some statistics
+                double mean = stats.getMean();
+                double std = stats.getStandardDeviation();
+                double[] anomalies =noiseTransform.detectAnomaly(reconstructDelta,mean,std);
+
                 Line line = new Line(values);
                 line.setColor(ChartUtils.COLOR_GREEN);
                 line.setHasPoints(false);// too many values so don't draw points.
 
-                 List<Line> lines = new ArrayList<Line>();
+                List<Line> lines = new ArrayList<Line>();
                 lines.add(line);
 
                 is.close();
 
 
-            data = new LineChartData(lines);
-            data.setAxisXBottom(new Axis());
-            data.setAxisYLeft(new Axis().setHasLines(true));
+                data = new LineChartData(lines);
+                data.setAxisXBottom(new Axis());
+                data.setAxisYLeft(new Axis().setHasLines(true));
 
-            // prepare preview data, is better to use separate deep copy for preview chart.
-            // Set color to grey to make preview area more visible.
-            data2 = new LineChartData(data);
-            data2.getLines().get(0).setColor(ChartUtils.DEFAULT_DARKEN_COLOR);
+
+
+
+                // prepare preview data, is better to use separate deep copy for preview chart.
+                // Set color to grey to make preview area more visible.
+                data2 = new LineChartData(data);
+                data2.getLines().get(0).setColor(ChartUtils.DEFAULT_DARKEN_COLOR);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -315,13 +380,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public  static ArrayList<heatbeat> getHeatBeatListFromTextFiles(String filePath)
-    {
+    public static ArrayList<heatbeat> getHeatBeatListFromTextFiles(String filePath) {
         FileInputStream fis = null;
         InputStreamReader isr = null;
         BufferedReader bReader = null;
         ArrayList<heatbeat> listRes = new ArrayList<heatbeat>();
-        try{
+        try {
             fis = new FileInputStream(filePath);
             isr = new InputStreamReader(fis);
             bReader = new BufferedReader(isr);
@@ -329,21 +393,16 @@ public class MainActivity extends AppCompatActivity {
             String line = null;
             //save to array
             String[] strHeatBeat = null;
-            while (true)
-            {
+            while (true) {
                 line = bReader.readLine();
-                if (line == null)
-                {
+                if (line == null) {
                     break;
-                }
-                else
-                {
+                } else {
                     strHeatBeat = line.split(",");
 //                    listRes.add(new heatbeat())
                 }
             }
-        }catch (Exception e)
-        {
+        } catch (Exception e) {
 
         }
         return listRes;

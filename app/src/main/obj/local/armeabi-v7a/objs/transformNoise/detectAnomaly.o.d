@@ -8,7 +8,9 @@
  /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/diffKmean.h \
  /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/nearKmean.h \
  /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/asSignal_emxutil.h \
- /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/sum.h
+ /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/sum.h \
+ /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/std.h \
+ /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/mean.h
 
 /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/rt_nonfinite.h:
 
@@ -27,3 +29,7 @@
 /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/asSignal_emxutil.h:
 
 /Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/sum.h:
+
+/Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/std.h:
+
+/Users/admin/Downloads/ECGAnomalyDetection/app/src/main/jni/mean.h:

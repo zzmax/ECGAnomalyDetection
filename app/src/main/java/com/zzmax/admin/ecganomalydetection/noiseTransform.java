@@ -12,4 +12,6 @@ public class noiseTransform {
     public static native double[][] nearKmean(double[][] clusters,double[][] samples);
     public static native double[][] diffKmean(double[][] clusterIndices,double[][] clusters,double[][] samples);
     public static native double[][] asSignal(double[][] diffWindows);
+    public static native double[] detectAnomaly(double[][] reconstruct, double usualMean,
+                                                double usualStd );
 }

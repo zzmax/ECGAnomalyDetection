@@ -8,13 +8,14 @@
 /* Include files */
 #include "rt_nonfinite.h"
 #include "asSignal.h"
+#include "detectAnomaly.h"
 #include "diffKmean.h"
 #include "nearKmean.h"
 #include "asSignal_emxutil.h"
 
 /* Function Definitions */
 emxArray_real_T * diffKmean(const emxArray_real_T *clusterIndices, const emxArray_real_T
-               *clusters, const emxArray_real_T *data, emxArray_real_T
+               *clusters, const emxArray_real_T *samples, emxArray_real_T
                *diffWindows)
 {
   int i2;
@@ -46,7 +47,7 @@ emxArray_real_T * diffKmean(const emxArray_real_T *clusterIndices, const emxArra
     for (i2 = 0; i2 < 60; i2++) {
       b_diffWindows->data[diffWindows->size[0] + b_diffWindows->size[0] * i2] =
         clusters->data[(b_clusterIndices + clusters->size[0] * i2) - 1] -
-        data->data[i + data->size[0] * i2];
+        samples->data[i + samples->size[0] * i2];
     }
 
     i2 = diffWindows->size[0] * diffWindows->size[1];

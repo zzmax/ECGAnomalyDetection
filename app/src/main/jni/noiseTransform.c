@@ -14,6 +14,7 @@
 #include "nearKmean.h"
 #include "asSignal_initialize.h"
 #include "asSignal_emxAPI.h"
+#include "detectAnomaly.h"
 
 //--------------------------------------------------------------------------
 /* Function Declarations */
@@ -387,14 +388,59 @@ JNIEXPORT jobjectArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTra
 
 /*
  * Class:     com_zzmax_admin_ecganomalydetection_noiseTransform
- * Method:    initialize
- * Signature: ()V
+ * Method:    detectAnomaly
+ * Signature: ([[DDD)[D
  */
-JNIEXPORT void JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTransform_detectAnomaly
-  (JNIEnv *env, jclass cls)
+JNIEXPORT jdoubleArray JNICALL Java_com_zzmax_admin_ecganomalydetection_noiseTransform_detectAnomaly
+        (JNIEnv *env, jclass cls, jobjectArray a, jdouble mean, jdouble std)
 {
-    asSignal_initialize();
+    emxArray_real_T *reconstruct;
+
+
+    // Get a class reference for double
+    jclass classDouble = (*env)->FindClass(env, "[D");
+
+    // get the object at the i'th position (double array)
+    // Get the length (number of double arrays) of the object array passed in
+    jdoubleArray array = (jdoubleArray) (*env)->GetObjectArrayElement(env, a, 0);
+    int numArrays = (*env)->GetArrayLength(env, array);
+    /* Initialize function 'asSignal' input arguments. */
+    /* Initialize function input argument 'diffWindows'. */
+    int iv0[2] = { 1, numArrays};
+
+    int idx0;
+    int idx1;
+
+    /* Set the size of the array.
+       Change this size to the value that the application requires. */
+    reconstruct = emxCreateND_real_T(2, iv0);
+    /* Loop over the array to initialize each element. */
+    for (idx0 = 0; idx0 < reconstruct->size[0U]; idx0++) {
+        jsize length = (*env)->GetArrayLength(env, array);
+
+        jdouble *elements = (*env)->GetDoubleArrayElements(env,array,0);
+
+        for (idx1 = 0; idx1 < numArrays; idx1++) {
+            /* Set the value of the array element.
+               Change this value to the value that the application requires. */
+            reconstruct->data[idx0 + reconstruct->size[0] * idx1] = elements[idx1];
+        }
+
+        (*env)->ReleaseDoubleArrayElements(env, array, elements, 0); /* deleting the temporary C array */
+    }
+    (*env)->DeleteLocalRef(env,array);
+
+    jdoubleArray anomalyArray = (*env)->NewDoubleArray(env, 6);
+    jdouble *anomalies = (*env)->GetDoubleArrayElements(env,anomalyArray,0);
+    /* Call the entry-point 'detectAnomaly'. */
+    anomalies = detectAnomaly(reconstruct, mean, std, anomalies);
+
+    emxDestroyArray_real_T(reconstruct);
+    (*env)->ReleaseDoubleArrayElements(env, anomalyArray, anomalies, 0);
+//        (*env)->DeleteLocalRef(env,array);
+    return anomalyArray;
 }
+
 
 
 
