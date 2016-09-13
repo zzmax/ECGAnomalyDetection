@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
@@ -111,12 +112,26 @@ public class MainActivity extends AppCompatActivity {
         private LineChartView chart;//for signal orignal
         private LineChartData data;
 
+        private TextView outlierView;
+        private TextView sigma1View;
+        private TextView sigma2View;
+        private TextView sigma3View;
+        private TextView changesMView;
+        private TextView changesSView;
+        private TextView dataLenView;
+
+
         private LineChartView chart2;//for noise
         private LineChartData data2;
 
-        private int numberOfLines = 1;
+        private int numberOfLines = 2;
         private int maxNumberOfLines = 4;
         private int numberOfPoints = 12;
+
+        private double[] anomalies = new double[6];
+        private double dataLen;
+
+        private String [] dataFileNames = {"normalHeatbeat.txt","arrhyHeatbeat.txt","cardiacDeathHeatbeat.txt"};
 
         float[][] randomNumbersTab = new float[maxNumberOfLines][numberOfPoints];
 
@@ -140,22 +155,33 @@ public class MainActivity extends AppCompatActivity {
             View rootView = inflater.inflate(R.layout.fragment_line_chart, container, false);
 
             chart = (LineChartView) rootView.findViewById(R.id.chart);
+            outlierView = (TextView) rootView.findViewById(R.id.outlierNum);
+             sigma1View = (TextView) rootView.findViewById(R.id.sigma1Num);
+             sigma2View = (TextView) rootView.findViewById(R.id.sigma2Num);
+             sigma3View = (TextView) rootView.findViewById(R.id.sigma3Num);
+             changesMView = (TextView) rootView.findViewById(R.id.changesMNum);
+             changesSView = (TextView) rootView.findViewById(R.id.changesSNum);
+            dataLenView = (TextView) rootView.findViewById(R.id.dataLengthNum);
 
-            chart2 = (LineChartView) rootView.findViewById(R.id.chart2);
+//            chart2 = (LineChartView) rootView.findViewById(R.id.chart2);
 
             // Generate data for previewed chart and copy of that data for preview chart.
-            generateDefaultData();
-
+            generateDefaultData(0);
+            setTextViewsDate();
             chart.setLineChartData(data);
+
             // Disable zoom/scroll for previewed chart, visible chart ranges depends on preview chart viewport so
             // zoom/scroll is unnecessary.
-            chart.setZoomEnabled(false);
-            chart.setScrollEnabled(false);
+            chart.setZoomEnabled(true);
+            chart.setScrollEnabled(true);
 
-            chart2.setLineChartData(data2);
-            chart2.setViewportChangeListener(new ViewportListener());
 
-            previewX(false);
+
+
+//            chart2.setLineChartData(data2);
+//            chart2.setViewportChangeListener(new ViewportListener());
+//
+//            previewX(false);
 
             return rootView;
         }
@@ -163,75 +189,70 @@ public class MainActivity extends AppCompatActivity {
         // MENU
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//            inflater.inflate(R.menu.preview_line_chart, menu);
+            inflater.inflate(R.menu.line_chart, menu);
         }
 
-//        @Override
-//        public boolean onOptionsItemSelected(MenuItem item) {
-//            int id = item.getItemId();
-//            if (id == R.id.action_reset) {
-//                generateDefaultData();
-//                chart.setLineChartData(data);
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            int id = item.getItemId();
+            if (id == R.id.normal_heatbeat) {
+                generateDefaultData(0);
+                setTextViewsDate();
+                chart.setLineChartData(data);
 //                chart2.setLineChartData(data2);
 //                previewX(true);
-//                return true;
-//            }
-//            if (id == R.id.action_preview_both) {
-//                previewXY();
-//                chart2.setZoomType(ZoomType.HORIZONTAL_AND_VERTICAL);
-//                return true;
-//            }
-//            if (id == R.id.action_preview_horizontal) {
-//                previewX(true);
-//                return true;
-//            }
-//            if (id == R.id.action_preview_vertical) {
-//                previewY();
-//                return true;
-//            }
-//            if (id == R.id.action_change_color) {
-//                int color = ChartUtils.pickColor();
-//                while (color == chart2.getPreviewColor()) {
-//                    color = ChartUtils.pickColor();
-//                }
-//                chart2.setPreviewColor(color);
-//                return true;
-//            }
-//            return super.onOptionsItemSelected(item);
-//        }
+                return true;
+            }
+            if (id == R.id.arrhythmia_heatbeat) {
+                generateDefaultData(1);
+                setTextViewsDate();
+                chart.setLineChartData(data);
+                return true;
+            }
+            if (id == R.id.cardiac_death_heatbeat) {
+                generateDefaultData(2);
+                setTextViewsDate();
+                chart.setLineChartData(data);
+                return true;
+            }
 
-        private void generateDefaultData() {
+            return super.onOptionsItemSelected(item);
+        }
+
+        private void setTextViewsDate(){
+            outlierView.setText( String.valueOf(anomalies[0]));
+            sigma1View.setText( String.valueOf(anomalies[1]));
+            sigma2View.setText( String.valueOf(anomalies[2]));
+            sigma3View.setText( String.valueOf(anomalies[3]));
+            changesMView.setText( String.valueOf(anomalies[4]/dataLen));
+            changesSView.setText( String.valueOf(anomalies[5]/dataLen));
+            dataLenView.setText( String.valueOf(dataLen));
+        }
+
+        private void generateDefaultData(int dataFileIndice) {
             AssetManager am = getContext().getAssets();
             InputStream is = null;
             try {
+                /*
                 is = am.open("heatbeatSample1.txt");
 
                 BufferedReader reader = new BufferedReader(new InputStreamReader(
                         is));
-//                //Skip 2 lines.
-//                for(int i=1;i<=2;i++)
-//                {
-//                    reader.readLine();
-//                }
 
                 int numHeatMetricsRow = 0;
 
-                List<PointValue> values = new ArrayList<PointValue>();
+
                 String aStr = null;
                 List<double[]> heatMetricsArray = new ArrayList<double[]>();
-                List<double[]> clustersMetricsArray = new ArrayList<double[]>();
+
 
                 while (reader.ready()) {
                     aStr = reader.readLine();
-//                    String[] separated = aStr.split("\t");
-//                    String[] separated2 = separated[0].split(":");
-
-//                    values.add(new PointValue(Float.parseFloat(separated2[1]), Float.parseFloat(separated[1])));
                     String[] separated = aStr.split(",");
                     int i = 0;
                     double[] aHeatArray = new double[separated.length];
                     while (i < separated.length) {
-//                        values.add(new PointValue(numValues, Float.parseFloat(separated[i])));
                         aHeatArray[i] = Double.parseDouble(separated[i]);
                         i++;
                     }
@@ -246,22 +267,46 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 is.close();
+
+
+                double[][] clusterIndiceMetrics = new double[numHeatMetricsRow][1];
+
+                noiseTransform.initialize();
+                clusterIndiceMetrics = noiseTransform.nearKmean(clustersMetrics, heatMetrics);
+
+                double[][] diffWindowsMetrics = new double[numHeatMetricsRow][];
+                diffWindowsMetrics = noiseTransform.diffKmean(clusterIndiceMetrics, clustersMetrics, heatMetrics);
+                double[][] reconstructDelta  = noiseTransform.asSignal(diffWindowsMetrics);
+
+
+                */
+
+/************************************************
+                DescriptiveStatistics stats = new DescriptiveStatistics();
+                // Add the data from the array
+                for( int i = 0; i < reconstructDelta[0].length; i++) {
+                    stats.addValue(reconstructDelta[0][i]);
+                }
+
+                // Compute some statistics
+                double mean = stats.getMean();
+                double std = stats.getStandardDeviation();*/
+
+/***************************************************/
+
                 //get clusters
                 is = am.open("clusters.txt");
                 BufferedReader reader2 = new BufferedReader(new InputStreamReader(
                         is));
+                String aStr = null;
+                List<double[]> clustersMetricsArray = new ArrayList<double[]>();
                 int numClusterMetricsRow = 0;
                 while (reader2.ready()) {
                     aStr = reader2.readLine();
-//                    String[] separated = aStr.split("\t");
-//                    String[] separated2 = separated[0].split(":");
-
-//                    values.add(new PointValue(Float.parseFloat(separated2[1]), Float.parseFloat(separated[1])));
                     String[] separated = aStr.split(",");
                     int i = 0;
                     double[] aClusterArray = new double[separated.length];
                     while (i < separated.length) {
-//                        values.add(new PointValue(numValues, Float.parseFloat(separated[i])));
                         aClusterArray[i] = Double.parseDouble(separated[i]);
                         i++;
                     }
@@ -275,44 +320,105 @@ public class MainActivity extends AppCompatActivity {
                     clustersMetrics[i] = clustersMetricsArray.get(i);
                 }
 
-                double[][] clusterIndiceMetrics = new double[numHeatMetricsRow][1];
+                is = am.open(dataFileNames[dataFileIndice]);
 
-                noiseTransform.initialize();
-                clusterIndiceMetrics = noiseTransform.nearKmean(clustersMetrics, heatMetrics);
+                BufferedReader reader3 = new BufferedReader(new InputStreamReader(
+                        is));
 
-                double[][] diffWindowsMetrics = new double[numHeatMetricsRow][];
-                diffWindowsMetrics = noiseTransform.diffKmean(clusterIndiceMetrics, clustersMetrics, heatMetrics);
-                double[][] reconstructDelta  = noiseTransform.asSignal(diffWindowsMetrics);
+                int numSigHeatMetricsRow = 0;
+                aStr = null;
+                List<double[]> sigHeatMetricsArray = new ArrayList<double[]>();
 
-                for (int i = 0; i < heatMetrics.length; i++) {
-                    for (int j = 0; j < heatMetrics[i].length; j++)
-                        values.add(new PointValue(j, (float) heatMetrics[i][j]));
+                while (reader3.ready()) {
+                    aStr = reader3.readLine();
+                    String[] separated = aStr.split(",");
+                    int i = 0;
+                    double[] aSigHeatArray = new double[separated.length];
+                    while (i < separated.length) {
+                        aSigHeatArray[i] = Double.parseDouble(separated[i]);
+                        i++;
+                    }
+                    sigHeatMetricsArray.add(aSigHeatArray);
+                    numSigHeatMetricsRow++;
+
                 }
-//                 for (int i = 0; i < numValues; ++i) {
-//                     reader.readLine();
-////                    values.add(new PointValue(i, (float) Math.random() * 100f));
-//                     values.add(new PointValue(reader.read(), (float)reader.read()));
-//                 }
+                double[][] sigHeatMetrics = new double[numSigHeatMetricsRow][];
+
+                for (int i = 0; i < numSigHeatMetricsRow; i++) {
+                    sigHeatMetrics[i] = sigHeatMetricsArray.get(i);
+                }
+                double[][] clusterIndiceMetrics = new double[numSigHeatMetricsRow][1];
+                double[][] diffWindowsMetrics = new double[numSigHeatMetricsRow][];
+                clusterIndiceMetrics = noiseTransform.nearKmean(clustersMetrics, sigHeatMetrics);
+
+                diffWindowsMetrics = new double[numSigHeatMetricsRow][];
+                diffWindowsMetrics = noiseTransform.diffKmean(clusterIndiceMetrics, clustersMetrics, sigHeatMetrics);
+                double[][] reconstructDelta = noiseTransform.asSignal(diffWindowsMetrics);
+                is.close();
+
+                double[][] clustersForSignalMetrics = new double[numSigHeatMetricsRow][];
+                for (int i = 0; i < numSigHeatMetricsRow; i++){
+                    clustersForSignalMetrics[i] = clustersMetricsArray.get((int)(clusterIndiceMetrics[i][0]) - 1 );
+//                    int t = (int)(clusterIndiceMetrics[i][0]);
+//                    clustersForSignalMetrics[i] = clustersMetrics[t];
+                }
+                
+                is = am.open("meanAndStd.txt");
+
+                BufferedReader reader4 = new BufferedReader(new InputStreamReader(
+                        is));
+
+                aStr = null;
+                double mean = 0;
+                double std = 0;
+                while (reader4.ready()) {
+                    aStr = reader4.readLine();
+                    String[] separated = aStr.split(",");
+                    int i = 0;
+                    while (i < separated.length) {
+                        switch (i)
+                        {
+                            case 0: mean = Double.parseDouble(separated[i]);
+                            break;
+                            case 1: std = Double.parseDouble(separated[i]);
+                                break;
+                        }
 
 
-/*************************************************/
-                DescriptiveStatistics stats = new DescriptiveStatistics();
-                // Add the data from the array
-                for( int i = 0; i < reconstructDelta[0].length; i++) {
-                    stats.addValue(reconstructDelta[0][i]);
+                        i++;
+                    }
                 }
 
-                // Compute some statistics
-                double mean = stats.getMean();
-                double std = stats.getStandardDeviation();
-                double[] anomalies =noiseTransform.detectAnomaly(reconstructDelta,mean,std);
+                anomalies =noiseTransform.detectAnomaly(reconstructDelta,mean,std);
+                dataLen = reconstructDelta[0].length;
+/*********************************************************************/
+                /****
+                 * Draw charts for signal(1:200) and clustersForSignalMetrics(1:200)
+                 */
+                List<PointValue> valueSig = new ArrayList<PointValue>();
+                List<PointValue> valueCluster = new ArrayList<PointValue>();
+                int len = sigHeatMetrics[0].length;
+                for (int k=0; k < 200/len; k++) {
+                    for (int j = 0; j < len; j++)
+                    {
+                        valueSig.add(new PointValue(k*len+j, (float) sigHeatMetrics[k][j]));
+                        valueCluster.add(new PointValue(k*len+j, (float) clustersForSignalMetrics[k][j]));
+                    }
 
-                Line line = new Line(values);
+                }
+
+                Line line = new Line(valueSig);
                 line.setColor(ChartUtils.COLOR_GREEN);
+                line.setStrokeWidth(1);
                 line.setHasPoints(false);// too many values so don't draw points.
+                Line lineCluster = new Line(valueCluster);
+                lineCluster.setColor(ChartUtils.COLOR_ORANGE);
+                lineCluster.setHasPoints(false);// too many v
+                lineCluster.setStrokeWidth(1);
 
                 List<Line> lines = new ArrayList<Line>();
                 lines.add(line);
+                lines.add(lineCluster);
 
                 is.close();
 
@@ -320,14 +426,14 @@ public class MainActivity extends AppCompatActivity {
                 data = new LineChartData(lines);
                 data.setAxisXBottom(new Axis());
                 data.setAxisYLeft(new Axis().setHasLines(true));
-
+//
 
 
 
                 // prepare preview data, is better to use separate deep copy for preview chart.
                 // Set color to grey to make preview area more visible.
-                data2 = new LineChartData(data);
-                data2.getLines().get(0).setColor(ChartUtils.DEFAULT_DARKEN_COLOR);
+//                data2 = new LineChartData(data);
+//                data2.getLines().get(0).setColor(ChartUtils.DEFAULT_DARKEN_COLOR);
             } catch (IOException e) {
                 e.printStackTrace();
             }

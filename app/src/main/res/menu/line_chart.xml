@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.zzmax.admin.ecganomalydetection.MainActivity" >
+
+    <item
+        android:id="@+id/normal_heatbeat"
+        android:title="Data normal sinus rhythm heatbeat"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/arrhythmia_heatbeat"
+        android:title="Data arrhythmia heatbeat"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/cardiac_death_heatbeat"
+        android:title="Data cardiac death heatbeat"
+        app:showAsAction="never"/>
+
+
+</menu>

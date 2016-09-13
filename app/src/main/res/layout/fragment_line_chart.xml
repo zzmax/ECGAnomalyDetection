@@ -8,13 +8,13 @@
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
     android:paddingTop="16dp"
-    tools:context="com.zzmax.admin.ecganomalydetection.MainActivity$PlaceholderFragment">
+    tools:context="com.zzmax.admin.ecganomalydetection.MainActivity$PlaceholderFragment"
+    android:weightSum="1">
 
     <lecho.lib.hellocharts.view.LineChartView
         android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" >
+        android:layout_height="253dp">
     </lecho.lib.hellocharts.view.LineChartView>
 
     <View
@@ -24,10 +24,145 @@
         android:layout_marginTop="8dp"
         android:background="@android:color/darker_gray" />
 
-    <lecho.lib.hellocharts.view.LineChartView
-        android:id="@+id/chart2"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-    </lecho.lib.hellocharts.view.LineChartView>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="36dp"
+        android:orientation="horizontal"
+        android:weightSum="1" >
+        <TextView
+            android:id="@+id/outliers"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="outliers" />
+        <TextView
+            android:id="@+id/outlierNum"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="outlierNum" />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="32dp"
+        android:orientation="horizontal"
+        android:weightSum="1" >
+        <TextView
+            android:id="@+id/sigma1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="sigma1" />
+        <TextView
+            android:id="@+id/sigma1Num"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="sigma1Num" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="35dp"
+        android:orientation="horizontal"
+        android:weightSum="1" >
+        <TextView
+            android:id="@+id/sigma2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="sigma2" />
+        <TextView
+            android:id="@+id/sigma2Num"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="sigma2Num" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="31dp"
+        android:orientation="horizontal"
+        android:weightSum="1" >
+        <TextView
+            android:id="@+id/sigma3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="sigma3" />
+        <TextView
+            android:id="@+id/sigma3Num"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="sigma3Num" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="28dp"
+        android:orientation="horizontal"
+        android:weightSum="1" >
+        <TextView
+            android:id="@+id/changesM"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="changesM" />
+        <TextView
+            android:id="@+id/changesMNum"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="changesMNum" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="28dp"
+        android:orientation="horizontal"
+        android:weightSum="1" >
+        <TextView
+            android:id="@+id/changesS"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="changesS" />
+        <TextView
+            android:id="@+id/changesSNum"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="changesSNum" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="28dp"
+        android:orientation="horizontal"
+        android:weightSum="1" >
+        <TextView
+            android:id="@+id/dataLength"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="dataLength" />
+        <TextView
+            android:id="@+id/dataLengthNum"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:gravity="center"
+            android:text="dataLengthNum" />
+    </LinearLayout>
 </LinearLayout>
